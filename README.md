@@ -1,7 +1,16 @@
-# auto-semver-action
-Creates a new version using commit messages and existing Release Tags.
 
-When commit message has one `#major`, `#premajor`, `#minor`, `#preminor`, `#patch`, `#prepatch`, or `#prerelease` keyword then increments a version by using latest release tag. 
+# auto-semver-action
+auto-semver-action allows you to easily determine the next version number.
+
+## How does it work?
+Automatically determines the next semantic version number by using repository tags. Uses the commit messages to determine the type of changes in the repository. 
+
+### Commit message format
+Example of the release types that will be done based on a commit messages:
+
+*If commit messages didn't match below types specified default release type will be use.*
+
+`#major`, `#premajor`, `#minor`, `#preminor`, `#patch`, `#prepatch`, `#prerelease`
 
 ## Inputs
 
@@ -11,7 +20,8 @@ When commit message has one `#major`, `#premajor`, `#minor`, `#preminor`, `#patc
 
 ### `releaseType`
 
-**Required** Default type of semantic version increment to make when cannot found on commit messages. One of `major`, `premajor`, `minor`, `preminor`, `patch`, `prepatch`, or `prerelease`.
+**Required** Default semantic version release type.
+`major`, `premajor`, `minor`, `preminor`, `patch`, `prepatch`, or `prerelease`.
 
 ### `github_token`
 
@@ -23,7 +33,6 @@ When commit message has one `#major`, `#premajor`, `#minor`, `#preminor`, `#patc
   steps:
   - name: Auto Increment Semver Action
     uses: MCKanpolat/auto-semver-action@1.0.5
-    id: vers
     with:
       releaseType: patch
       github_token: ${{ secrets.GITHUB_TOKEN }}
