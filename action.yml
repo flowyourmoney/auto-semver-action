@@ -6,6 +6,9 @@ inputs:
     required: false
     description: 'identifier for version (beta,alpha..)'
     default: ''
+  github_token:
+    description: 'Token to get tags from the repo. Pass in using `secrets.GITHUB_TOKEN`.'
+    required: true
 runs:
   using: 'node12'
   main: 'dist/index.js'
