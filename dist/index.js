@@ -41,12 +41,12 @@ const github_1 = __webpack_require__(5438);
 const versionBuilder_1 = __webpack_require__(59);
 // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
 function run() {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const versionIdentifier = core.getInput('identifier') || '';
             const defaultReleaseType = core.getInput('releaseType') || '';
-            const commitMessages = ((_a = github_1.context.payload.commits) === null || _a === void 0 ? void 0 : _a.message) || [];
+            const commits = github_1.context.payload.commits || [];
+            const commitMessages = commits.map((m) => m.message) || [];
             core.debug(`Context payload => ${JSON.stringify(github_1.context.payload)}`);
             const latestVer = yield versionBuilder_1.getMostRecentVersionFromTags(github_1.context);
             const nextVersion = versionBuilder_1.increment(latestVer.version, versionIdentifier, commitMessages, defaultReleaseType);

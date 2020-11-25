@@ -7,7 +7,9 @@ async function run(): Promise<void> {
   try {
     const versionIdentifier: string = core.getInput('identifier') || ''
     const defaultReleaseType: string = core.getInput('releaseType') || ''
-    const commitMessages = context.payload.commits?.message || []
+    const commits = context.payload.commits || []
+    const commitMessages =
+      commits.map((m: {message: string}) => m.message) || []
 
     core.debug(`Context payload => ${JSON.stringify(context.payload)}`)
     const latestVer = await getMostRecentVersionFromTags(context)
