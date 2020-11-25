@@ -1,16 +1,22 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import * as github from '@actions/github'
+import {Context} from '@actions/github/lib/context'
+import {getMostRecentVersionFromTags, increment} from './versionBuilder'
 
-async function run(): Promise<void> {
+// debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+async function run(context: Context = github.context): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+    const versionIdentifier: string = core.getInput('identifier') || ''
+    const payloadLabels = context.payload.pull_request?.labels || []
+    const latestVer = await getMostRecentVersionFromTags(context)
+    const nextVersion = increment(
+      latestVer.version,
+      versionIdentifier,
+      payloadLabels
+    )
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
+    core.exportVariable('VERSION', nextVersion?.version)
+    core.setOutput('version', nextVersion?.version)
   } catch (error) {
     core.setFailed(error.message)
   }
