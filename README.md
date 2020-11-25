@@ -41,3 +41,6 @@ Example of the release types that will be done based on a commit messages:
     - name: Next Release Number
       run: echo ${{ steps.versioning.outputs.version }}
 ```
+
+## Debugging
+To see debug output from this action, you must set the secret ACTIONS_STEP_DEBUG to true in your repository. 
