@@ -6,16 +6,19 @@ import {getMostRecentVersionFromTags, increment} from './versionBuilder'
 async function run(): Promise<void> {
   try {
     const versionIdentifier: string = core.getInput('identifier') || ''
-    const payloadLabels = context.payload.pull_request?.labels || []
+    const defaultReleaseType: string = core.getInput('releaseType') || ''
+    const commitMessages = context.payload.commits?.message || []
+
     core.debug(`Context payload => ${JSON.stringify(context.payload)}`)
     const latestVer = await getMostRecentVersionFromTags(context)
     const nextVersion = increment(
       latestVer.version,
       versionIdentifier,
-      payloadLabels
+      commitMessages,
+      defaultReleaseType
     )
 
-    core.exportVariable('VERSION', nextVersion?.version)
+    core.exportVariable('version', nextVersion?.version)
     core.setOutput('version', nextVersion?.version)
   } catch (error) {
     core.setFailed(error.message)

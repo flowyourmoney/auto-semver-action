@@ -45,11 +45,12 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const versionIdentifier = core.getInput('identifier') || '';
-            const payloadLabels = ((_a = github_1.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.labels) || [];
-            core.debug(`Context payload => ${github_1.context.payload}`);
+            const defaultReleaseType = core.getInput('releaseType') || '';
+            const commitMessages = ((_a = github_1.context.payload.commits) === null || _a === void 0 ? void 0 : _a.message) || [];
+            core.debug(`Context payload => ${JSON.stringify(github_1.context.payload)}`);
             const latestVer = yield versionBuilder_1.getMostRecentVersionFromTags(github_1.context);
-            const nextVersion = versionBuilder_1.increment(latestVer.version, versionIdentifier, payloadLabels);
-            core.exportVariable('VERSION', nextVersion === null || nextVersion === void 0 ? void 0 : nextVersion.version);
+            const nextVersion = versionBuilder_1.increment(latestVer.version, versionIdentifier, commitMessages, defaultReleaseType);
+            core.exportVariable('version', nextVersion === null || nextVersion === void 0 ? void 0 : nextVersion.version);
             core.setOutput('version', nextVersion === null || nextVersion === void 0 ? void 0 : nextVersion.version);
         }
         catch (error) {
@@ -113,19 +114,21 @@ const defaultConfig = {
     prepatch: ['prepatch'],
     prerelease: ['prerelease']
 };
-function increment(versionNumber, versionIdentifier, labels) {
+function increment(versionNumber, versionIdentifier, commitMessages, defaultReleaseType) {
     const version = semver_1.default.parse(versionNumber) || new semver_1.default.SemVer('0.0.0');
     core.debug(`Config used => ${JSON.stringify(defaultConfig)}`);
     const matchedLabels = new Set();
-    core.debug(`Found PR labels on Payload => ${JSON.stringify(labels)}`);
-    for (const label of labels) {
+    for (const message of commitMessages) {
         for (const [key, value] of Object.entries(defaultConfig)) {
-            if (matcher_1.default.isMatch(label, value)) {
+            if (matcher_1.default.isMatch(message, `*#${value}*`)) {
                 matchedLabels.add(key);
             }
         }
     }
-    core.debug(`Parsed PR labels => ${JSON.stringify(matchedLabels)}`);
+    core.debug(`Parsed labels from commit messages => ${JSON.stringify(matchedLabels)}`);
+    if (matchedLabels.size === 0) {
+        matchedLabels.add(defaultReleaseType);
+    }
     for (const label of matchedLabels) {
         version === null || version === void 0 ? void 0 : version.inc(label, versionIdentifier);
         core.debug(`Increment version for label => ${label} - ${version.version}`);

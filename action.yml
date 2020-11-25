@@ -1,11 +1,15 @@
 name: 'Auto Increment Semver Action'
-description: 'Generates a new version using Pull Request Labels with Semver'
+description: 'Generates a new version using Commit Message Syntax with Semver'
 author: 'Mehmet Can Kanpolat'
 inputs:
   identifier:
     required: false
     description: 'identifier for version (beta,alpha..)'
     default: ''
+  releaseType:
+    required: true
+    description: 'Uses this if any labels cannot be found in the commit messages.'
+    default: 'patch'
   github_token:
     description: 'Token to get tags from the repo. Pass in using `secrets.GITHUB_TOKEN`.'
     required: true

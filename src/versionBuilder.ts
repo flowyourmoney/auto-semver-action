@@ -17,23 +17,28 @@ const defaultConfig = {
 export function increment(
   versionNumber: string,
   versionIdentifier: string,
-  labels: string[]
+  commitMessages: string[],
+  defaultReleaseType: string
 ): semver.SemVer {
   const version = semver.parse(versionNumber) || new semver.SemVer('0.0.0')
   core.debug(`Config used => ${JSON.stringify(defaultConfig)}`)
-
   const matchedLabels = new Set<string>()
 
-  core.debug(`Found PR labels on Payload => ${JSON.stringify(labels)}`)
-  for (const label of labels) {
+  for (const message of commitMessages) {
     for (const [key, value] of Object.entries(defaultConfig)) {
-      if (matcher.isMatch(label, value)) {
+      if (matcher.isMatch(message, `*#${value}*`)) {
         matchedLabels.add(key)
       }
     }
   }
 
-  core.debug(`Parsed PR labels => ${JSON.stringify(matchedLabels)}`)
+  core.debug(
+    `Parsed labels from commit messages => ${JSON.stringify(matchedLabels)}`
+  )
+
+  if (matchedLabels.size === 0) {
+    matchedLabels.add(defaultReleaseType)
+  }
 
   for (const label of matchedLabels) {
     version?.inc(label as semver.ReleaseType, versionIdentifier)
