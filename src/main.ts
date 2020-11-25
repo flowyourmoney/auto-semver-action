@@ -8,6 +8,7 @@ async function run(context: Context = github.context): Promise<void> {
   try {
     const versionIdentifier: string = core.getInput('identifier') || ''
     const payloadLabels = context.payload.pull_request?.labels || []
+    core.debug(`Context payload => ${context.payload}`)
     const latestVer = await getMostRecentVersionFromTags(context)
     const nextVersion = increment(
       latestVer.version,
