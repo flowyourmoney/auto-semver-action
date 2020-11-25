@@ -37,16 +37,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__webpack_require__(2186));
-const github = __importStar(__webpack_require__(5438));
+const github_1 = __webpack_require__(5438);
 const versionBuilder_1 = __webpack_require__(59);
 // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-function run(context = github.context) {
+function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const versionIdentifier = core.getInput('identifier') || '';
-            const payloadLabels = ((_a = context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.labels) || [];
-            const latestVer = yield versionBuilder_1.getMostRecentVersionFromTags(context);
+            const payloadLabels = ((_a = github_1.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.labels) || [];
+            core.debug(`Context payload => ${github_1.context.payload}`);
+            const latestVer = yield versionBuilder_1.getMostRecentVersionFromTags(github_1.context);
             const nextVersion = versionBuilder_1.increment(latestVer.version, versionIdentifier, payloadLabels);
             core.exportVariable('VERSION', nextVersion === null || nextVersion === void 0 ? void 0 : nextVersion.version);
             core.setOutput('version', nextVersion === null || nextVersion === void 0 ? void 0 : nextVersion.version);

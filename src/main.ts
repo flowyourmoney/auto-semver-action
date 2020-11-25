@@ -1,10 +1,9 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
-import {Context} from '@actions/github/lib/context'
+import {context} from '@actions/github'
 import {getMostRecentVersionFromTags, increment} from './versionBuilder'
 
 // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-async function run(context: Context = github.context): Promise<void> {
+async function run(): Promise<void> {
   try {
     const versionIdentifier: string = core.getInput('identifier') || ''
     const payloadLabels = context.payload.pull_request?.labels || []
