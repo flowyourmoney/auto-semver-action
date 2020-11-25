@@ -30,10 +30,14 @@ Example of the release types that will be done based on a commit messages:
 ## Example usage
 
 ```yaml
-  steps:
-  - name: Auto Increment Semver Action
-    uses: MCKanpolat/auto-semver-action@1.0.5
-    with:
-      releaseType: patch
-      github_token: ${{ secrets.GITHUB_TOKEN }}
+   steps:
+    - name: Auto Increment Semver Action
+      uses: MCKanpolat/auto-semver-action@1.0.5
+      id: versioning
+      with:
+        releaseType: patch 
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Next Release Number
+      run: echo ${{ steps.versioning.outputs.version }}
 ```
