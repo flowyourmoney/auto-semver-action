@@ -40,7 +40,7 @@ Example of the release types that will be done based on a commit messages:
       id: versioning
       with:
         releaseType: patch 
-        incrementForEveryCommit: false
+        incrementPerCommit: false
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Next Release Number
