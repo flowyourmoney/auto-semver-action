@@ -7,6 +7,9 @@ async function run(): Promise<void> {
   try {
     const versionIdentifier: string = core.getInput('identifier') || ''
     const defaultReleaseType: string = core.getInput('releaseType') || ''
+    const incrementForEveryCommit = Boolean(
+      JSON.parse(core.getInput('incrementForEveryCommit'))
+    )
     const commits = context.payload.commits || []
     const commitMessages =
       commits.map((m: {message: string}) => m.message) || []
@@ -17,7 +20,8 @@ async function run(): Promise<void> {
       latestVer.version,
       versionIdentifier,
       commitMessages,
-      defaultReleaseType
+      defaultReleaseType,
+      incrementForEveryCommit
     )
 
     core.exportVariable('version', nextVersion?.version)

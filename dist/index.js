@@ -45,11 +45,12 @@ function run() {
         try {
             const versionIdentifier = core.getInput('identifier') || '';
             const defaultReleaseType = core.getInput('releaseType') || '';
+            const incrementForEveryCommit = Boolean(JSON.parse(core.getInput('incrementForEveryCommit')));
             const commits = github_1.context.payload.commits || [];
             const commitMessages = commits.map((m) => m.message) || [];
             core.debug(`Context payload => ${JSON.stringify(github_1.context.payload)}`);
             const latestVer = yield versionBuilder_1.getMostRecentVersionFromTags(github_1.context);
-            const nextVersion = versionBuilder_1.increment(latestVer.version, versionIdentifier, commitMessages, defaultReleaseType);
+            const nextVersion = versionBuilder_1.increment(latestVer.version, versionIdentifier, commitMessages, defaultReleaseType, incrementForEveryCommit);
             core.exportVariable('version', nextVersion === null || nextVersion === void 0 ? void 0 : nextVersion.version);
             core.setOutput('version', nextVersion === null || nextVersion === void 0 ? void 0 : nextVersion.version);
         }
@@ -105,6 +106,15 @@ const core = __importStar(__webpack_require__(2186));
 const semver_1 = __importDefault(__webpack_require__(1383));
 const matcher_1 = __importDefault(__webpack_require__(2239));
 const github = __importStar(__webpack_require__(5438));
+const releaseTypeOrder = [
+    'major',
+    'premajor',
+    'minor',
+    'preminor',
+    'patch',
+    'prepatch',
+    'prerelease'
+];
 const defaultConfig = {
     major: ['major'],
     premajor: ['premajor'],
@@ -114,24 +124,47 @@ const defaultConfig = {
     prepatch: ['prepatch'],
     prerelease: ['prerelease']
 };
-function increment(versionNumber, versionIdentifier, commitMessages, defaultReleaseType) {
+function increment(versionNumber, versionIdentifier, commitMessages, defaultReleaseType, incrementForEveryCommit) {
     const version = semver_1.default.parse(versionNumber) || new semver_1.default.SemVer('0.0.0');
     core.debug(`Config used => ${JSON.stringify(defaultConfig)}`);
-    const matchedLabels = new Set();
+    let matchedLabels = new Array();
     for (const message of commitMessages) {
+        let msgMatch = false;
         for (const [key, value] of Object.entries(defaultConfig)) {
-            if (matcher_1.default.isMatch(message, `*#${value}*`)) {
-                matchedLabels.add(key);
+            for (const releaseType of value) {
+                if (matcher_1.default.isMatch(message, `*#${releaseType}*`)) {
+                    matchedLabels.push(key);
+                    msgMatch = true;
+                }
+            }
+        }
+        if (incrementForEveryCommit && !msgMatch) {
+            matchedLabels.push(defaultReleaseType);
+        }
+    }
+    core.debug(`Parsed labels from commit messages => ${JSON.stringify([
+        ...matchedLabels
+    ])}`);
+    if (matchedLabels.length === 0) {
+        matchedLabels.push(defaultReleaseType);
+    }
+    //find highest release type and singularize
+    if (!incrementForEveryCommit) {
+        for (const releaseType of releaseTypeOrder) {
+            if (matchedLabels.find(w => w.toLowerCase() === releaseType)) {
+                matchedLabels = [];
+                matchedLabels.push(releaseType);
+                break;
             }
         }
     }
-    core.debug(`Parsed labels from commit messages => ${JSON.stringify(matchedLabels)}`);
-    if (matchedLabels.size === 0) {
-        matchedLabels.add(defaultReleaseType);
-    }
-    for (const label of matchedLabels) {
-        version === null || version === void 0 ? void 0 : version.inc(label, versionIdentifier);
-        core.debug(`Increment version for label => ${label} - ${version.version}`);
+    for (const releaseType of releaseTypeOrder) {
+        const len = matchedLabels.filter(w => w.toLowerCase() === releaseType)
+            .length;
+        for (let index = 0; index < len; index++) {
+            version === null || version === void 0 ? void 0 : version.inc(releaseType, versionIdentifier);
+            core.debug(`Increment version for label => ${releaseType} - ${version.version}`);
+        }
     }
     return version;
 }
