@@ -4,6 +4,16 @@ import matcher from 'matcher'
 import * as github from '@actions/github'
 import {Context} from '@actions/github/lib/context'
 
+const releaseTypeOrder = [
+  'major',
+  'premajor',
+  'minor',
+  'preminor',
+  'patch',
+  'prepatch',
+  'prerelease'
+]
+
 const defaultConfig = {
   major: ['major'],
   premajor: ['premajor'],
@@ -18,31 +28,58 @@ export function increment(
   versionNumber: string,
   versionIdentifier: string,
   commitMessages: string[],
-  defaultReleaseType: string
+  defaultReleaseType: string,
+  incrementForEveryCommit: boolean
 ): semver.SemVer {
   const version = semver.parse(versionNumber) || new semver.SemVer('0.0.0')
   core.debug(`Config used => ${JSON.stringify(defaultConfig)}`)
-  const matchedLabels = new Set<string>()
+  let matchedLabels = new Array<string>()
 
   for (const message of commitMessages) {
+    let msgMatch = false
     for (const [key, value] of Object.entries(defaultConfig)) {
-      if (matcher.isMatch(message, `*#${value}*`)) {
-        matchedLabels.add(key)
+      for (const releaseType of value) {
+        if (matcher.isMatch(message, `*#${releaseType}*`)) {
+          matchedLabels.push(key)
+          msgMatch = true
+        }
       }
+    }
+    if (incrementForEveryCommit && !msgMatch) {
+      matchedLabels.push(defaultReleaseType)
     }
   }
 
   core.debug(
-    `Parsed labels from commit messages => ${JSON.stringify(matchedLabels)}`
+    `Parsed labels from commit messages => ${JSON.stringify([
+      ...matchedLabels
+    ])}`
   )
 
-  if (matchedLabels.size === 0) {
-    matchedLabels.add(defaultReleaseType)
+  if (matchedLabels.length === 0) {
+    matchedLabels.push(defaultReleaseType)
   }
 
-  for (const label of matchedLabels) {
-    version?.inc(label as semver.ReleaseType, versionIdentifier)
-    core.debug(`Increment version for label => ${label} - ${version.version}`)
+  //find highest release type and singularize
+  if (!incrementForEveryCommit) {
+    for (const releaseType of releaseTypeOrder) {
+      if (matchedLabels.find(w => w.toLowerCase() === releaseType)) {
+        matchedLabels = []
+        matchedLabels.push(releaseType)
+        break
+      }
+    }
+  }
+
+  for (const releaseType of releaseTypeOrder) {
+    const len = matchedLabels.filter(w => w.toLowerCase() === releaseType)
+      .length
+    for (let index = 0; index < len; index++) {
+      version?.inc(releaseType as semver.ReleaseType, versionIdentifier)
+      core.debug(
+        `Increment version for label => ${releaseType} - ${version.version}`
+      )
+    }
   }
 
   return version
