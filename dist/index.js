@@ -45,12 +45,12 @@ function run() {
         try {
             const versionIdentifier = core.getInput('identifier') || '';
             const defaultReleaseType = core.getInput('releaseType') || '';
-            const incrementForEveryCommit = Boolean(JSON.parse(core.getInput('incrementForEveryCommit')));
+            const incrementPerCommit = Boolean(JSON.parse(core.getInput('incrementPerCommit')));
             const commits = github_1.context.payload.commits || [];
             const commitMessages = commits.map((m) => m.message) || [];
             core.debug(`Context payload => ${JSON.stringify(github_1.context.payload)}`);
             const latestVer = yield versionBuilder_1.getMostRecentVersionFromTags(github_1.context);
-            const nextVersion = versionBuilder_1.increment(latestVer.version, versionIdentifier, commitMessages, defaultReleaseType, incrementForEveryCommit);
+            const nextVersion = versionBuilder_1.increment(latestVer.version, versionIdentifier, commitMessages, defaultReleaseType, incrementPerCommit);
             core.exportVariable('version', nextVersion === null || nextVersion === void 0 ? void 0 : nextVersion.version);
             core.setOutput('version', nextVersion === null || nextVersion === void 0 ? void 0 : nextVersion.version);
         }
@@ -124,7 +124,7 @@ const defaultConfig = {
     prepatch: ['prepatch'],
     prerelease: ['prerelease']
 };
-function increment(versionNumber, versionIdentifier, commitMessages, defaultReleaseType, incrementForEveryCommit) {
+function increment(versionNumber, versionIdentifier, commitMessages, defaultReleaseType, incrementPerCommit) {
     const version = semver_1.default.parse(versionNumber) || new semver_1.default.SemVer('0.0.0');
     core.debug(`Config used => ${JSON.stringify(defaultConfig)}`);
     let matchedLabels = new Array();
@@ -138,7 +138,7 @@ function increment(versionNumber, versionIdentifier, commitMessages, defaultRele
                 }
             }
         }
-        if (incrementForEveryCommit && !msgMatch) {
+        if (incrementPerCommit && !msgMatch) {
             matchedLabels.push(defaultReleaseType);
         }
     }
@@ -149,7 +149,7 @@ function increment(versionNumber, versionIdentifier, commitMessages, defaultRele
         matchedLabels.push(defaultReleaseType);
     }
     //find highest release type and singularize
-    if (!incrementForEveryCommit) {
+    if (!incrementPerCommit) {
         for (const releaseType of releaseTypeOrder) {
             if (matchedLabels.find(w => w.toLowerCase() === releaseType)) {
                 matchedLabels = [];

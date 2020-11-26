@@ -29,7 +29,7 @@ export function increment(
   versionIdentifier: string,
   commitMessages: string[],
   defaultReleaseType: string,
-  incrementForEveryCommit: boolean
+  incrementPerCommit: boolean
 ): semver.SemVer {
   const version = semver.parse(versionNumber) || new semver.SemVer('0.0.0')
   core.debug(`Config used => ${JSON.stringify(defaultConfig)}`)
@@ -45,7 +45,7 @@ export function increment(
         }
       }
     }
-    if (incrementForEveryCommit && !msgMatch) {
+    if (incrementPerCommit && !msgMatch) {
       matchedLabels.push(defaultReleaseType)
     }
   }
@@ -61,7 +61,7 @@ export function increment(
   }
 
   //find highest release type and singularize
-  if (!incrementForEveryCommit) {
+  if (!incrementPerCommit) {
     for (const releaseType of releaseTypeOrder) {
       if (matchedLabels.find(w => w.toLowerCase() === releaseType)) {
         matchedLabels = []

@@ -18,9 +18,9 @@ Example of the release types that will be done based on a commit messages:
 
 **Optional** Semver identifier for version (beta,alpha..).
 
-### `incrementForEveryCommit`
+### `incrementPerCommit`
 
-**Optional** Increments a version for every commit (true,false).
+**Optional** Increments a version for each commit (true,false).
 
 ### `releaseType`
 
