@@ -10,6 +10,10 @@ inputs:
     required: true
     description: 'Uses this if any labels cannot be found in the commit messages.'
     default: 'patch'
+  incrementPerCommit:
+    required: false
+    description: 'Increments a version for each commit.'
+    default: 'false'
   github_token:
     description: 'Token to get tags from the repo. Pass in using `secrets.GITHUB_TOKEN`.'
     required: true
