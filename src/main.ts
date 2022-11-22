@@ -26,7 +26,7 @@ async function run(): Promise<void> {
 
     core.exportVariable('version', nextVersion?.version)
     core.setOutput('version', nextVersion?.version)
-  } catch (error) {
+  } catch (error: any) {
     core.setFailed(error.message)
   }
 }

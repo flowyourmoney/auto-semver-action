@@ -72,8 +72,9 @@ export function increment(
   }
 
   for (const releaseType of releaseTypeOrder) {
-    const len = matchedLabels.filter(w => w.toLowerCase() === releaseType)
-      .length
+    const len = matchedLabels.filter(
+      w => w.toLowerCase() === releaseType
+    ).length
     for (let index = 0; index < len; index++) {
       version?.inc(releaseType as semver.ReleaseType, versionIdentifier)
       core.debug(
@@ -91,7 +92,7 @@ export async function getMostRecentVersionFromTags(
   const token = core.getInput('github_token', {required: true})
   const octokit = github.getOctokit(token)
 
-  const {data: refs} = await octokit.git.listMatchingRefs({
+  const {data: refs} = await octokit.rest.git.listMatchingRefs({
     owner: context.repo.owner,
     repo: context.repo.repo,
     ref: 'tags/'
