@@ -1,6 +1,6 @@
 {
   "name": "auto-semver-action",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "private": true,
   "description": "Generates a new version using Commit Message Syntax with Semver",
   "main": "lib/main.js",
@@ -34,6 +34,7 @@
     "@types/jest": "^29.2.3",
     "@types/node": "^18.11.9",
     "@types/semver": "^7.3.13",
+    "@typescript-eslint/eslint-plugin": "^5.44.0",
     "@typescript-eslint/parser": "^5.44.0",
     "@vercel/ncc": "^0.34.0",
     "eslint": "^8.28.0",
