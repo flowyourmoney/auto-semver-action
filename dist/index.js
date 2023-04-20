@@ -111,7 +111,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getMostRecentVersionFromTags = exports.increment = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const semver_1 = __importDefault(__nccwpck_require__(1383));
-const matcher_1 = __importDefault(__nccwpck_require__(3618));
+const matcher_1 = __nccwpck_require__(3618);
 const github = __importStar(__nccwpck_require__(5438));
 const releaseTypeOrder = [
     'major',
@@ -135,11 +135,14 @@ function increment(versionNumber, versionIdentifier, commitMessages, defaultRele
     const version = semver_1.default.parse(versionNumber) || new semver_1.default.SemVer('0.0.0');
     core.debug(`Config used => ${JSON.stringify(defaultConfig)}`);
     let matchedLabels = new Array();
+    core.debug(`Commmit messages => ${JSON.stringify(commitMessages)}`);
+    core.debug(`matcher.isMatch => ${JSON.stringify(matcher_1.isMatch)}`);
     for (const message of commitMessages) {
         let msgMatch = false;
         for (const [key, value] of Object.entries(defaultConfig)) {
             for (const releaseType of value) {
-                if (matcher_1.default.isMatch(message, `*#${releaseType}*`)) {
+                core.debug(`message => ${JSON.stringify(message)}; releaseType: ${releaseType} `);
+                if (message && (0, matcher_1.isMatch)(message, `*#${releaseType}*`)) {
                     matchedLabels.push(key);
                     msgMatch = true;
                 }

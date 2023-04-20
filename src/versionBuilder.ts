@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import semver from 'semver'
-import matcher from 'matcher'
+import {isMatch} from 'matcher'
 import * as github from '@actions/github'
 import {Context} from '@actions/github/lib/context'
 
@@ -39,7 +39,7 @@ export function increment(
     let msgMatch = false
     for (const [key, value] of Object.entries(defaultConfig)) {
       for (const releaseType of value) {
-        if (matcher.isMatch(message, `*#${releaseType}*`)) {
+        if (isMatch(message, `*#${releaseType}*`)) {
           matchedLabels.push(key)
           msgMatch = true
         }
